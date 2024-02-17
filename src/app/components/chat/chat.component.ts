@@ -1,5 +1,6 @@
 import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ChatService } from 'src/app/services/chat.service';
 
 @Component({
   selector: 'app-chat',
@@ -16,7 +17,8 @@ export class ChatComponent implements OnInit {
 
   constructor(
     private formBuilder: FormBuilder,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private chatServise:ChatService
     ) {
     this.chatForm = this.formBuilder.group({
       message: [''] 
@@ -29,9 +31,14 @@ export class ChatComponent implements OnInit {
   sendMessage(): void {
     if (this.chatForm.valid) {
       const message = this.chatForm.value.message;
-      this.messages.push(message); 
+      let sendMgs = {
+        text:message,
+        type: 'sender'
+      }
+      this.messages.push(sendMgs); 
       this.chatForm.reset();
       this.scrollMessageIntoView();
+      this.chatServise.sendMessage(message);
     }
   }
 
