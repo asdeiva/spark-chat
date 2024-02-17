@@ -1,1 +1,25 @@
-<p>chat works!</p>
+<div class="d-flex justify-content-center mt-5">
+    <div class="card p-3" style="width: 50rem;height: 500px">
+      <h5 class="card-title text-center">Chat Box</h5>
+      <div class="card-body overflow-auto" #messageContainer>
+        <div *ngIf="messages && messages.length">
+          <ul class="list-group" *ngFor="let message of messages">
+            <li class="list-group-item text-end m-2">{{message}}</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card-footer">
+        <form [formGroup]="chatForm" (ngSubmit)="sendMessage()">
+            <div class="input-group mb-3">
+              <input type="text" class="form-control" formControlName="message" #messageInput />
+              <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="submit">
+                  Send
+                </button>
+              </div>
+            </div>
+          </form>
+      </div>
+    </div>
+  </div>
+  
