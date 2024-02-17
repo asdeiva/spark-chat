@@ -8,7 +8,10 @@ import { ChatComponent } from './components/chat/chat.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 
-const config: SocketIoConfig = { url: 'http://localhost:8988', options: {} };
+const config: SocketIoConfig = { 
+  url: 'http://localhost:5000',
+  options: {} 
+};
 
 
 @NgModule({

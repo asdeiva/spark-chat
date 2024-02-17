@@ -1,19 +1,19 @@
 <div class="d-flex justify-content-center mt-5">
-  <div class="card p-3" style="width: 50rem; height: 500px">
+  <div class="card p-3 text-bg-dark" style="width: 50rem; height: 500px">
     <h5 class="card-title text-center">Chat Box</h5>
     <div class="card-body overflow-auto" #messageContainer>
       <div *ngIf="messages && messages.length">
-        <ul class="list-group" *ngFor="let message of messages">
-          <li
-            class="list-group-item m-2"
+        <div *ngFor="let message of messages">
+          <p
+            class="m-2 text-white text-bg-dark"
             [ngClass]="{
-              'text-end': message?.type === 'sender',
-              'text-start': message?.type === 'receiver'
+              'text-end': message?.type === 'sent',
+              'text-start': message?.type === 'receive'
             }"
           >
             {{ message.text }}
-          </li>
-        </ul>
+          </p>
+        </div>
       </div>
     </div>
     <div class="card-footer">
@@ -26,7 +26,7 @@
             #messageInput
           />
           <div class="input-group-append">
-            <button class="btn btn-outline-secondary" type="submit">
+            <button class="btn btn-warning" type="submit">
               Send
             </button>
           </div>
