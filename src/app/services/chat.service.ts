@@ -15,6 +15,6 @@ export class ChatService {
     this.socket.emit('message', msg);
   }
   getMessage() {
-    return this.socket.fromEvent('message').pipe(map((data:any) => data.msg));
+    return this.socket.fromEvent('received').pipe(map((data:any) => data));
   }
 }
