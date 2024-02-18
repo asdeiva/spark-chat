@@ -1,6 +1,6 @@
 import {  Component,  ElementRef,  OnDestroy,  OnInit,  Renderer2,  ViewChild,} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, debounceTime, distinctUntilChanged, switchMap, takeUntil, timer } from 'rxjs';
 import { ChatService } from 'src/app/services/chat.service';
 
 @Component({
@@ -14,7 +14,10 @@ export class ChatComponent implements OnInit,OnDestroy {
 
   messages: any[] = [];
   chatForm: FormGroup;
-  getMessagesSubscription:Subscription;
+  getMessagesSubscription:Subscription | undefined;
+  valueChangesSubscription: Subscription | undefined;
+  isTyping:boolean = false;
+  private destroy$: Subject<void> = new Subject();
 
   constructor(
     private formBuilder: FormBuilder,
@@ -24,9 +27,10 @@ export class ChatComponent implements OnInit,OnDestroy {
     this.chatForm = this.formBuilder.group({
       message: [''],
     });
-    this.getMessagesSubscription = this.chatServise.getMessage().subscribe((message: any) => {
-    this.focusOnInput();
-    });
+    
+    this.getOldmessages();
+    this.getTypingStatus();
+    this.startTypingDetection();
   }
 
   ngOnInit(): void {
@@ -34,12 +38,13 @@ export class ChatComponent implements OnInit,OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.unsubscribeSubscription(this.getMessagesSubscription);
-  }
-
-  unsubscribeSubscription(variable:Subscription) {
-    if(variable){
-      variable.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
+    if(this.getMessagesSubscription){
+      this.getMessagesSubscription.unsubscribe();
+    }
+    if(this.valueChangesSubscription){
+      this.valueChangesSubscription.unsubscribe();
     }
   }
   
@@ -70,8 +75,9 @@ export class ChatComponent implements OnInit,OnDestroy {
     this.chatForm = this.formBuilder.group({
       message: ['', Validators.required],
     });
+    this.startTypingDetection();
     this.focusOnInput();
-    this.getOldmessages();
+    this.getTypingStatus();
   }
 
   focusOnInput() {
@@ -81,9 +87,30 @@ export class ChatComponent implements OnInit,OnDestroy {
   }
 
   getOldmessages() {
-    this.chatServise.getMessage().subscribe((message: any) => {
-      // console.log('Received message:', message);
+    this.getMessagesSubscription = this.chatServise.getMessage().subscribe((message: any) => {
       this.messages.push(message);
+      this.focusOnInput();
+      });
+  }
+
+  getTypingStatus(){
+    this.chatServise.getTypingStatus().subscribe((data:any)=>{
+      this.isTyping = data.isTyping;
+    })
+  }
+
+  startTypingDetection() {
+    this.valueChangesSubscription = this.chatForm.get('message')?.valueChanges.pipe(
+      distinctUntilChanged(),
+      // switchMap(() => timer(200)),
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      // Send typing status to the server
+      this.chatServise.sendTypingStatus(true);
+      // Automatically send 'false' after a period of inactivity
+      timer(1000).pipe(takeUntil(this.destroy$)).subscribe(() => {
+        this.chatServise.sendTypingStatus(false);
+      });
     });
   }
 }

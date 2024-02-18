@@ -16,6 +16,7 @@
         </div>
       </div>
     </div>
+    <div class="text-warning text-center m-2" *ngIf="isTyping">Typing...</div>
     <div class="card-footer">
       <form [formGroup]="chatForm" (ngSubmit)="sendMessage()">
         <div class="input-group mb-3">

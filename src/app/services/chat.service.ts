@@ -14,6 +14,15 @@ export class ChatService {
   sendMessage(msg: string) {
     this.socket.emit('message', msg);
   }
+
+  sendTypingStatus(status:boolean){
+    this.socket.emit('typing-status',status);
+  }
+  
+  getTypingStatus(){
+    return this.socket.fromEvent('isTyping').pipe(map((data:any) => data));
+  }
+
   getMessage() {
     return this.socket.fromEvent('received').pipe(map((data:any) => data));
   }
